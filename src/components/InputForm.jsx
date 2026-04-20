@@ -12,6 +12,8 @@ import {
 const GRID_DEFAULT =
   'grid grid-cols-1 gap-2.5 min-[400px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5'
 const GRID_FOUR = 'grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3'
+const GRID_MOOD =
+  'grid grid-cols-2 gap-2.5 min-[420px]:grid-cols-3 sm:gap-3 lg:grid-cols-6'
 
 function OptionGrid({ title, options, field, value, onChange, disabled, gridClassName = GRID_DEFAULT }) {
   return (
@@ -84,7 +86,7 @@ export function InputForm({
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-            오늘 무드는 어때요?
+            What&apos;s the vibe today?
           </h2>
           <p className="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:mt-1 sm:text-sm">
             한 줄마다 하나씩 골라 주세요. 손가락에 닿기 쉽게 크게 만들어 두었어요.
@@ -116,6 +118,7 @@ export function InputForm({
           value={v.mood}
           onChange={handleFieldChange}
           disabled={disabled}
+          gridClassName={GRID_MOOD}
         />
         <OptionGrid
           title="예산"

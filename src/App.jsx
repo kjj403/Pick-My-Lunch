@@ -97,6 +97,11 @@ function buildUserPrompt(values) {
     }
   })()
 
+  const moodSpiceBlock =
+    values.mood === 'angry'
+      ? 'MOOD: 화남·짜증—prioritize SPICY / high capsaicin / "스트레스 풀" foods that fit the chosen cuisine (한식이면 매운 떡볶이·불닭·마라 등, 분식 프랜차이즈 시그니처 매운맛도 OK). reasonSummary에서 매운맛·자극으로 기분 전환을 짧게 연결. nutritionBadges에 🔥 매운맛 등 가능.'
+      : ''
+
   return [
     'Recommend ONE specific meal (pick a single winner).',
     cuisineConstraint,
@@ -104,19 +109,22 @@ function buildUserPrompt(values) {
     dislikeBlock,
     exerciseBlock,
     nutrientBlock,
+    moodSpiceBlock,
     `User labels (use verbatim in analysis): weather="${w}", hunger="${h}", mood="${m}", budget="${b}", cuisine="${c}", allergies="${allergies || '없음'}", dislikes="${dislikes || '없음'}", exerciseTiming="${exLabel}", nutrientFocus="${nfLabel}".`,
     'reasonSummary must tie the dish to these labels with concrete (non-poetic) reasons.',
     'Health insight must reference these labels and give sodium % of 2300mg day; strongly connect meal timing to exercise when exerciseTiming is not "보통".',
     'Nutrition comparison: referenceFood must be a heavier well-known meal in the SAME cuisine as your pick; calorieRatio = this meal / that reference.',
     'mealAlternatives: exactly 4 items—sides or add-ons that PAIR with the main dish in the SAME cuisine. Not substitute meals or "healthier swaps". oneLiner in Korean. Must also respect allergy/dislike rules.',
-  ].join('\n')
+  ]
+    .filter(Boolean)
+    .join('\n')
 }
 
 const RECO_SYSTEM = `You are Savoir, a premium Korean-market AI food recommender. Reply with JSON only, no markdown.
 
 Schema:
 {
-  "food": "short name of ONE meal",
+  "food": "short name of ONE meal (Korean how people order: generic dish OR chain signature, e.g. 엽기떡볶이, 신전 로제떡볶이, 교촌 허니콤보—still one string)",
   "overallMatchScore": 0-100,
   "reasonSummary": "2-3 sentences Korean: data-backed why this dish fits the user (not poetry)",
   "nutrition": {
@@ -149,6 +157,8 @@ mealAlternatives: always 4 entries. Each must complement "food" in the same cuis
 If the user specified a cuisine (한/중/일/양), "food" and every mealAlternative MUST stay in that cuisine. If 아무거나, any cuisine is allowed.
 
 If the user listed allergies, never output dish names or sides that contain those allergens.
+
+Naming: real Korean delivery/franchise menu names are encouraged when they match budget+cuisine (분식·치킨·프랜차이즈 등). Keep "food" to one concrete pick.
 
 Estimate nutrition for one typical serving. calorieRatio = this meal calories / reference meal calories.`
 

@@ -19,6 +19,7 @@ export const MOOD = [
   { id: 'hype', emoji: '🔥', label: '들떠 있음' },
   { id: 'chill', emoji: '😌', label: '느긋함' },
   { id: 'celebrate', emoji: '🥳', label: '축하하는 날' },
+  { id: 'angry', emoji: '😤', label: '화남·짜증' },
 ]
 
 export const BUDGET = [
