@@ -15,7 +15,3 @@ export function kakaoMapSearchUrl(query) {
 export function coupangSearchUrl(query) {
   return `https://www.coupang.com/np/search?q=${enc(query)}`
 }
-
-export function kurlySearchUrl(query) {
-  return `https://www.kurly.com/search?keyword=${enc(query)}`
-}

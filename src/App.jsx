@@ -38,6 +38,13 @@ function labelById(list, id) {
   return list.find((x) => x.id === id)?.label ?? id
 }
 
+function normDishLabel(s) {
+  return String(s ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+}
+
 function buildUserPrompt(values) {
   const w = labelById(WEATHER, values.weather)
   const h = labelById(HUNGER, values.hunger)
@@ -269,7 +276,7 @@ export default function App() {
   const runRecommendation = useCallback(
     async (rawValues, options = {}) => {
       const values = { ...defaultInputValues, ...rawValues }
-      const { skipCache = false } = options
+      const { skipCache = false, excludeDish } = options
       setError('')
       if (!hasApiKey()) {
         setError(
@@ -323,30 +330,56 @@ export default function App() {
       try {
         const client = getOpenAIClient()
         const userPrompt = buildUserPrompt(values)
+        const prev = typeof excludeDish === 'string' ? excludeDish.trim() : ''
+        const excludeBlock = prev
+          ? `\n\n[다시 뽑기] 직전 추천 "${prev}"은(는) 다시 내지 마세요. 같은 음식·같은 브랜드 동일 라인·겉만 다른 변형(예: 매운맛만 다른 같은 떡볶이)도 피하고, 사용자가 바로 구분할 만큼 다른 한 끼를 고르세요. food 문자열이 이전과 달라야 합니다.`
+          : ''
 
-        const apiPromise = client.chat.completions.create({
-          model: 'gpt-4o',
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: RECO_SYSTEM },
-            {
-              role: 'user',
-              content: `${userPrompt}\nLabels for hook line: mood="${labels.mood}", hunger="${labels.hunger}", budget="${labels.budget}", weather="${labels.weather}", cuisine="${labels.cuisine}", exercise="${labels.exerciseTiming}", nutrient="${labels.nutrientFocus}".`,
-            },
-          ],
-        })
+        const labelsLine = `\nLabels for hook line: mood="${labels.mood}", hunger="${labels.hunger}", budget="${labels.budget}", weather="${labels.weather}", cuisine="${labels.cuisine}", exercise="${labels.exerciseTiming}", nutrient="${labels.nutrientFocus}".`
+
+        const fetchReco = (extra = '', temperature = prev ? 1.15 : 1) =>
+          client.chat.completions.create({
+            model: 'gpt-4o',
+            response_format: { type: 'json_object' },
+            temperature,
+            messages: [
+              { role: 'system', content: RECO_SYSTEM },
+              {
+                role: 'user',
+                content: `${userPrompt}${excludeBlock}${extra}${labelsLine}`,
+              },
+            ],
+          })
 
         await delay(1000)
-        const completion = await apiPromise
+        let completion = await fetchReco()
 
-        const raw = completion.choices[0]?.message?.content?.trim() ?? '{}'
-        let parsed
+        const parsePayload = (raw) => {
+          const parsed = JSON.parse(raw)
+          return normalizeRecommendation(parsed, labels)
+        }
+
+        let raw = completion.choices[0]?.message?.content?.trim() ?? '{}'
+        let payload
         try {
-          parsed = JSON.parse(raw)
+          payload = parsePayload(raw)
         } catch {
           throw new Error('응답을 해석하지 못했어요. 다시 시도해 주세요.')
         }
-        const payload = normalizeRecommendation(parsed, labels)
+
+        if (prev && normDishLabel(payload.dish) === normDishLabel(prev)) {
+          await delay(450)
+          completion = await fetchReco(
+            `\n\n[재시도 필수] 직전과 동일한 food가 나왔습니다. 다른 요리 부류(예: 면↔밥, 튀김↔국물, 치킨↔분식)로 바꿔 food를 다르게 쓰세요.`,
+            1.35,
+          )
+          raw = completion.choices[0]?.message?.content?.trim() ?? '{}'
+          try {
+            payload = parsePayload(raw)
+          } catch {
+            throw new Error('응답을 해석하지 못했어요. 다시 시도해 주세요.')
+          }
+        }
 
         applyRecoPayload(
           {
@@ -377,8 +410,8 @@ export default function App() {
   )
 
   const handleReshuffle = useCallback(() => {
-    runRecommendation(input, { skipCache: true })
-  }, [input, runRecommendation])
+    runRecommendation(input, { skipCache: true, excludeDish: dish })
+  }, [input, runRecommendation, dish])
 
   const handleLike = useCallback(() => {
     if (!guardAction() || !dish.trim()) return
@@ -540,7 +573,7 @@ export default function App() {
             </button>
           </div>
           <p className="max-w-2xl text-sm leading-relaxed text-slate-800 dark:text-slate-300 lg:text-base">
-            오늘 점메추 고민은 여기서 끝. 분위기만 골라 보세요—Savoir가 한 끼를 뽑아 줄게요.
+            오늘 점심/저녁 메뉴는?
           </p>
         </header>
 

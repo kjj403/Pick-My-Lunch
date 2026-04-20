@@ -88,9 +88,6 @@ export function InputForm({
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
             What&apos;s the vibe today?
           </h2>
-          <p className="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:mt-1 sm:text-sm">
-            한 줄마다 하나씩 골라 주세요. 손가락에 닿기 쉽게 크게 만들어 두었어요.
-          </p>
         </div>
       </div>
 

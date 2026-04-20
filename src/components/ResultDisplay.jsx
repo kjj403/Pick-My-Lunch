@@ -277,7 +277,7 @@ export function ResultDisplay({
             </span>
           )}
           <span className="rounded-full border border-indigo-200 bg-white/90 px-3 py-1.5 text-sm font-bold text-indigo-800 shadow-sm dark:border-indigo-700 dark:bg-slate-800 dark:text-indigo-200">
-            종합 {overallMatchScore}/100
+            리뷰 점수 {overallMatchScore}/100
           </span>
         </div>
       </div>
