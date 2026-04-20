@@ -22,8 +22,8 @@
 
 ## 라이브 데모
 
-- **프로덕션 (Vercel):** [https://savoir-ai-food-picks.vercel.app](https://savoir-ai-food-picks.vercel.app)  
-  Vercel 프로젝트 도메인을 바꾼 경우, 위 주소를 실제 프로덕션 URL로 바꿔 주세요.
+- **프로덕션 (Vercel):** [https://pick-my-lunch.vercel.app](https://pick-my-lunch.vercel.app)  
+
 
 ## 로컬에서 실행
 
