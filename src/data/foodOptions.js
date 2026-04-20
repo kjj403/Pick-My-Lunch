@@ -22,6 +22,13 @@ export const MOOD = [
   { id: 'angry', emoji: '😤', label: '화남·짜증' },
 ]
 
+/** 함께 먹는지(인원 느낌) */
+export const COMPANY = [
+  { id: 'solo', emoji: '🙋', label: '혼밥' },
+  { id: 'pair', emoji: '👥', label: '둘이서' },
+  { id: 'group', emoji: '👨‍👩‍👧', label: '여러 명' },
+]
+
 export const BUDGET = [
   { id: 'budget', emoji: '💸', label: '알뜰하게' },
   { id: 'moderate', emoji: '💰', label: '적당한 편' },
@@ -59,6 +66,7 @@ export const defaultInputValues = {
   weather: WEATHER[0].id,
   hunger: HUNGER[1].id,
   mood: MOOD[0].id,
+  company: COMPANY[0].id,
   budget: BUDGET[1].id,
   cuisine: CUISINE[4].id,
   allergies: '',

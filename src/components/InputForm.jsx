@@ -2,6 +2,7 @@ import {
   WEATHER,
   HUNGER,
   MOOD,
+  COMPANY,
   BUDGET,
   CUISINE,
   EXERCISE_LINK,
@@ -14,6 +15,7 @@ const GRID_DEFAULT =
 const GRID_FOUR = 'grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3'
 const GRID_MOOD =
   'grid grid-cols-2 gap-2.5 min-[420px]:grid-cols-3 sm:gap-3 lg:grid-cols-6'
+const GRID_THREE = 'grid grid-cols-3 gap-2.5 sm:gap-3'
 
 function OptionGrid({ title, options, field, value, onChange, disabled, gridClassName = GRID_DEFAULT }) {
   return (
@@ -116,6 +118,15 @@ export function InputForm({
           onChange={handleFieldChange}
           disabled={disabled}
           gridClassName={GRID_MOOD}
+        />
+        <OptionGrid
+          title="함께 먹기"
+          options={COMPANY}
+          field="company"
+          value={v.company}
+          onChange={handleFieldChange}
+          disabled={disabled}
+          gridClassName={GRID_THREE}
         />
         <OptionGrid
           title="예산"

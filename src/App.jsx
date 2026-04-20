@@ -5,6 +5,7 @@ import {
   WEATHER,
   HUNGER,
   MOOD,
+  COMPANY,
   BUDGET,
   CUISINE,
   EXERCISE_LINK,
@@ -51,6 +52,7 @@ function buildUserPrompt(values) {
   const m = labelById(MOOD, values.mood)
   const b = labelById(BUDGET, values.budget)
   const c = labelById(CUISINE, values.cuisine)
+  const co = labelById(COMPANY, values.company)
 
   const cuisineConstraint =
     values.cuisine === 'any'
@@ -109,6 +111,13 @@ function buildUserPrompt(values) {
       ? 'MOOD: 화남·짜증—prioritize SPICY / high capsaicin / "스트레스 풀" foods that fit the chosen cuisine (한식이면 매운 떡볶이·불닭·마라 등, 분식 프랜차이즈 시그니처 매운맛도 OK). reasonSummary에서 매운맛·자극으로 기분 전환을 짧게 연결. nutritionBadges에 🔥 매운맛 등 가능.'
       : ''
 
+  const companyBlock =
+    values.company === 'solo'
+      ? 'Dining company: 혼밥—single-portion·한 그릇·도시락·카운터 메뉴 등 1인에게 무리 없는 한 끼. 큰 쟁반만 추천하지 말 것.'
+      : values.company === 'pair'
+        ? 'Dining company: 둘이서—2인 세트·나눠 먹기 좋은 찌개+밥·덮밥 2개·소형 플래터 등 커플/동료 두 명에 맞는 양·구성.'
+        : 'Dining company: 여러 명(3+)—닭갈비·찜닭·치킨·전골·대형 한상 등 나눠 먹기 좋은 메인 위주; reasonSummary에 인원·나눔 언급.'
+
   return [
     'Recommend ONE specific meal (pick a single winner).',
     cuisineConstraint,
@@ -117,7 +126,8 @@ function buildUserPrompt(values) {
     exerciseBlock,
     nutrientBlock,
     moodSpiceBlock,
-    `User labels (use verbatim in analysis): weather="${w}", hunger="${h}", mood="${m}", budget="${b}", cuisine="${c}", allergies="${allergies || '없음'}", dislikes="${dislikes || '없음'}", exerciseTiming="${exLabel}", nutrientFocus="${nfLabel}".`,
+    companyBlock,
+    `User labels (use verbatim in analysis): weather="${w}", hunger="${h}", mood="${m}", company="${co}", budget="${b}", cuisine="${c}", allergies="${allergies || '없음'}", dislikes="${dislikes || '없음'}", exerciseTiming="${exLabel}", nutrientFocus="${nfLabel}".`,
     'reasonSummary must tie the dish to these labels with concrete (non-poetic) reasons.',
     'Health insight must reference these labels and give sodium % of 2300mg day; strongly connect meal timing to exercise when exerciseTiming is not "보통".',
     'Nutrition comparison: referenceFood must be a heavier well-known meal in the SAME cuisine as your pick; calorieRatio = this meal / that reference.',
@@ -292,6 +302,7 @@ export default function App() {
         weather: labelById(WEATHER, values.weather),
         hunger: labelById(HUNGER, values.hunger),
         mood: labelById(MOOD, values.mood),
+        company: labelById(COMPANY, values.company),
         budget: labelById(BUDGET, values.budget),
         cuisine: labelById(CUISINE, values.cuisine),
         exerciseTiming: labelById(EXERCISE_LINK, values.exerciseTiming),
@@ -335,7 +346,7 @@ export default function App() {
           ? `\n\n[다시 뽑기] 직전 추천 "${prev}"은(는) 다시 내지 마세요. 같은 음식·같은 브랜드 동일 라인·겉만 다른 변형(예: 매운맛만 다른 같은 떡볶이)도 피하고, 사용자가 바로 구분할 만큼 다른 한 끼를 고르세요. food 문자열이 이전과 달라야 합니다.`
           : ''
 
-        const labelsLine = `\nLabels for hook line: mood="${labels.mood}", hunger="${labels.hunger}", budget="${labels.budget}", weather="${labels.weather}", cuisine="${labels.cuisine}", exercise="${labels.exerciseTiming}", nutrient="${labels.nutrientFocus}".`
+        const labelsLine = `\nLabels for hook line: mood="${labels.mood}", hunger="${labels.hunger}", company="${labels.company}", budget="${labels.budget}", weather="${labels.weather}", cuisine="${labels.cuisine}", exercise="${labels.exerciseTiming}", nutrient="${labels.nutrientFocus}".`
 
         const fetchReco = (extra = '', temperature = prev ? 1.15 : 1) =>
           client.chat.completions.create({
@@ -451,7 +462,17 @@ export default function App() {
           : ''
         const exLab = labelById(EXERCISE_LINK, i.exerciseTiming)
         const nfLab = labelById(NUTRIENT_FOCUS, i.nutrientFocus)
-        const contextLine = [exLab !== '보통' ? `운동·식사: ${exLab}` : '', nfLab !== '균형' ? `영양: ${nfLab}` : '']
+        const companyLine =
+          i.company === 'solo'
+            ? '식사: 혼밥—1인분 분량·간단 조리 위주.'
+            : i.company === 'pair'
+              ? '식사: 둘이서—둘이 나눠 먹기 좋은 양.'
+              : '식사: 여러 명—인원 늘리기 쉬운 레시피.'
+        const contextLine = [
+          companyLine,
+          exLab !== '보통' ? `운동·식사: ${exLab}` : '',
+          nfLab !== '균형' ? `영양: ${nfLab}` : '',
+        ]
           .filter(Boolean)
           .join(' · ')
         const variantNote =
