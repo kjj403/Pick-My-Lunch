@@ -35,6 +35,6 @@ export function formatRecipeForShare(dish, recipe) {
   if (recipe.substitutions) {
     lines.push('', '【바꿔 쓰기】', recipe.substitutions)
   }
-  lines.push('', '— Savoir 레시피')
+  lines.push('', '— Pick My Lunch 레시피')
   return lines.join('\n')
 }

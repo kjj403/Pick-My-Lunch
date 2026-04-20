@@ -1,6 +1,6 @@
 # Pick-My-Lunch
 
-**Pick-My-Lunch**는 **오늘 점심/저녁 메뉴는?** 를 고민할 때 쓰는 점메추 웹앱입니다. (화면 안에서는 앱 이름 **Savoir**로 표시됩니다.)
+**Pick-My-Lunch**는 **오늘 점심 메뉴는?** 를 고민할 때 쓰는 점메추 웹앱입니다. 화면 상 브랜드는 **Pick My Lunch**입니다.
 
 날씨·배고픔·기분·**함께 먹기(혼밥 / 둘이서 / 여러 명)**·예산·요리 종류(한식·중식·일식·양식·아무거나)를 고르면, OpenAI가 **한 끼 메뉴**를 골라 주고 영양·건강 코멘트, **함께 먹기 좋은 곁들임**, 집밥 레시피까지 보여 줍니다. 알레르기·기피 재료, 운동 전후, 영양 포인트(단백질 등)도 반영할 수 있습니다.
 
@@ -75,5 +75,5 @@ React 19, Vite, Tailwind CSS v4, OpenAI JS SDK, canvas-confetti.
 ### README에 배포 링크 넣기
 
 1. Vercel → **Settings → Domains** 또는 배포 완료 화면에서 프로덕션 URL 복사.
-2. 이 파일 **「라이브 데모」** 줄의 링크를 `[Pick-My-Lunch 열기](https://실제주소)` 형식으로 수정.
+2. 이 파일 **「라이브 데모」** 줄의 링크를 `[Pick My Lunch 열기](https://실제주소)` 형식으로 수정.
 3. `git add README.md` → `commit` → `push` 하면 GitHub 메인에도 반영됩니다.

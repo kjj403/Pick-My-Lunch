@@ -23,7 +23,7 @@ import {
 } from './utils/recommendationNormalize'
 import { playSuccessChime } from './utils/successSound'
 
-const THEME_KEY = 'savoir-theme'
+const THEME_KEY = 'pick-my-lunch-theme'
 
 function getInitialDark() {
   if (typeof window === 'undefined') return false
@@ -137,7 +137,7 @@ function buildUserPrompt(values) {
     .join('\n')
 }
 
-const RECO_SYSTEM = `You are Savoir, a premium Korean-market AI food recommender. Reply with JSON only, no markdown.
+const RECO_SYSTEM = `You are Pick My Lunch, a premium Korean-market AI food recommender. Reply with JSON only, no markdown.
 
 Schema:
 {
@@ -577,11 +577,8 @@ export default function App() {
         <header className="mb-8 flex flex-col gap-4 lg:mb-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="min-w-0 flex-1 lg:text-left">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-800/90 dark:text-amber-400/90">
-                AI tasting companion
-              </p>
-              <h1 className="mt-1 bg-gradient-to-r from-orange-600 via-amber-600 to-rose-600 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-5xl">
-                Savoir
+              <h1 className="bg-gradient-to-r from-orange-600 via-amber-600 to-rose-600 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent sm:text-4xl md:text-5xl">
+                Pick My Lunch
               </h1>
             </div>
             <button
@@ -594,7 +591,7 @@ export default function App() {
             </button>
           </div>
           <p className="max-w-2xl text-sm leading-relaxed text-slate-800 dark:text-slate-300 lg:text-base">
-            오늘 점심/저녁 메뉴는?
+            오늘 점심 메뉴는?
           </p>
         </header>
 
@@ -641,7 +638,7 @@ export default function App() {
         </div>
 
         <footer className="mt-14 border-t border-white/40 pt-8 text-center text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          Savoir — AI 점메추 데모
+          Pick My Lunch — AI 점메추 데모
         </footer>
       </div>
     </div>
