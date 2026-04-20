@@ -534,8 +534,8 @@ export default function App() {
           </p>
         </header>
 
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 md:max-w-4xl lg:gap-12">
-          <section className="min-w-0 w-full" aria-label="오늘의 분위기와 취향">
+        <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-10 md:max-w-4xl lg:max-w-[min(100%,88rem)] lg:grid-cols-12 lg:items-start lg:gap-8 xl:gap-10">
+          <section className="min-w-0 lg:col-span-5" aria-label="오늘의 분위기와 취향">
             <InputForm
               values={input}
               onChange={setInput}
@@ -544,7 +544,7 @@ export default function App() {
             />
           </section>
 
-          <section className="min-w-0 w-full" aria-label="추천 결과">
+          <section className="min-w-0 lg:col-span-7" aria-label="추천 결과">
             <ResultDisplay
               loading={loading}
               dish={dish}

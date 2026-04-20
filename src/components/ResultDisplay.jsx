@@ -238,7 +238,8 @@ export function ResultDisplay({
           여기에 추천이 떨어져요
         </p>
         <p className="mt-3 text-base leading-relaxed">
-          위에서 분위기를 고르고{' '}
+          <span className="lg:hidden">위에서</span>
+          <span className="hidden lg:inline">왼쪽에서</span> 분위기를 고르고{' '}
           <span className="font-semibold text-orange-600 dark:text-amber-400">추천받기</span>를
           눌러보세요
         </p>
