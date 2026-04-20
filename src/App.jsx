@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { InputForm } from './components/InputForm'
 import { ResultDisplay } from './components/ResultDisplay'
-import { WEATHER, HUNGER, MOOD, BUDGET, defaultInputValues } from './data/foodOptions'
+import { WEATHER, HUNGER, MOOD, BUDGET, CUISINE, defaultInputValues } from './data/foodOptions'
 import { getOpenAIClient } from './lib/openai'
 import { saveToHistory, checkRepeat } from './utils/storage'
 import { hasApiKey } from './utils/env'
@@ -34,13 +34,29 @@ function buildUserPrompt(values) {
   const h = labelById(HUNGER, values.hunger)
   const m = labelById(MOOD, values.mood)
   const b = labelById(BUDGET, values.budget)
+  const c = labelById(CUISINE, values.cuisine)
+
+  const cuisineConstraint =
+    values.cuisine === 'any'
+      ? 'Cuisine: 아무거나—한식·중식·일식·양식 중 사용자 분위기에 가장 맞는 한 끼 하나를 고른다.'
+      : values.cuisine === 'korean'
+        ? 'STRICT: 한식만. 메인 "food"는 한국 음식(밥·국·찌개·분식·한정식·한국식 면 등)이어야 한다. 중식·일식·양식 요리명을 메인으로 쓰지 마라. mealAlternatives도 한식 곁들임만.'
+        : values.cuisine === 'chinese'
+          ? 'STRICT: 중식만. 메인은 중국 요리(짜장·짬뽕·마라·딤섬 등). mealAlternatives는 중식과 어울리는 반찬·꼬치·국물 등.'
+          : values.cuisine === 'japanese'
+            ? 'STRICT: 일식만. 메인은 일본식(초밥·돈카츠·라멘·덮밥·우동 등). mealAlternatives는 일식 세트에 어울리는 곁들임만.'
+            : values.cuisine === 'western'
+              ? 'STRICT: 양식만. 메인은 서양식(파스타·스테이크·샐러드·버거·리조또 등). mealAlternatives는 같은 양식 흐름의 수프·브레드·사이드.'
+              : ''
+
   return [
     'Recommend ONE specific meal (pick a single winner).',
-    `User labels (use verbatim in analysis): weather="${w}", hunger="${h}", mood="${m}", budget="${b}".`,
+    cuisineConstraint,
+    `User labels (use verbatim in analysis): weather="${w}", hunger="${h}", mood="${m}", budget="${b}", cuisine="${c}".`,
     'reasonSummary must tie the dish to these labels with concrete (non-poetic) reasons.',
     'Health insight must reference these labels and give sodium % of 2300mg day, meal timing vs workout if relevant.',
-    'Nutrition comparison: pick a well-known heavier Korean meal as reference for calorie ratio.',
-    'mealAlternatives: output exactly 4 items—Korean sides or add-ons that PAIR with the main dish (e.g. 떡볶이 → 튀김, 순대, 김밥, 어묵). Not substitute meals or "healthier swaps"; classic flavor/texture combos. Korean oneLiners explain the pairing.',
+    'Nutrition comparison: referenceFood must be a heavier well-known meal in the SAME cuisine as your pick; calorieRatio = this meal / that reference.',
+    'mealAlternatives: exactly 4 items—sides or add-ons that PAIR with the main dish in the SAME cuisine. Not substitute meals or "healthier swaps". oneLiner in Korean.',
   ].join('\n')
 }
 
@@ -60,7 +76,7 @@ Schema:
   },
   "nutritionBadges": ["2-4 short Korean badges like 🔥 고탄수", "💪 단백질 양호"],
   "comparison": {
-    "referenceFood": "well-known Korean reference meal",
+    "referenceFood": "well-known heavier meal in the SAME cuisine as food",
     "calorieRatio": 0.0-2.0,
     "summary": "Korean: compare this dish calories vs reference (e.g. 약 0.35배 칼로리)"
   },
@@ -76,9 +92,11 @@ Schema:
   ]
 }
 
-mealAlternatives: always 4 entries. Each must complement "food" (street-food sets, 반찬, 튀김·순대·김밥 같은 조합). Never frame as lower-calorie or "instead of" the main pick.
+mealAlternatives: always 4 entries. Each must complement "food" in the same cuisine (e.g. 한식 분식 세트, 중식 반찬, 일식 곁들임). Never frame as lower-calorie or "instead of" the main pick.
 
-Estimate nutrition for one typical Korean serving. calorieRatio = this meal calories / reference meal calories.`
+If the user specified a cuisine (한/중/일/양), "food" and every mealAlternative MUST stay in that cuisine. If 아무거나, any cuisine is allowed.
+
+Estimate nutrition for one typical serving. calorieRatio = this meal calories / reference meal calories.`
 
 const RECIPE_SYSTEM = `Return JSON only for Korean home cooking.
 
@@ -185,7 +203,8 @@ export default function App() {
   }, [])
 
   const runRecommendation = useCallback(
-    async (values, options = {}) => {
+    async (rawValues, options = {}) => {
+      const values = { ...defaultInputValues, ...rawValues }
       const { skipCache = false } = options
       setError('')
       if (!hasApiKey()) {
@@ -203,6 +222,7 @@ export default function App() {
         hunger: labelById(HUNGER, values.hunger),
         mood: labelById(MOOD, values.mood),
         budget: labelById(BUDGET, values.budget),
+        cuisine: labelById(CUISINE, values.cuisine),
       }
 
       if (!skipCache) {
@@ -245,7 +265,7 @@ export default function App() {
             { role: 'system', content: RECO_SYSTEM },
             {
               role: 'user',
-              content: `${userPrompt}\nLabels for hook line: mood="${labels.mood}", hunger="${labels.hunger}", budget="${labels.budget}", weather="${labels.weather}".`,
+              content: `${userPrompt}\nLabels for hook line: mood="${labels.mood}", hunger="${labels.hunger}", budget="${labels.budget}", weather="${labels.weather}", cuisine="${labels.cuisine}".`,
             },
           ],
         })
@@ -317,7 +337,13 @@ export default function App() {
       setRecipeShareFeedback('')
       try {
         const client = getOpenAIClient()
-        const budgetLabel = labelById(BUDGET, input.budget)
+        const i = { ...defaultInputValues, ...input }
+        const budgetLabel = labelById(BUDGET, i.budget)
+        const cuisineLabel = labelById(CUISINE, i.cuisine)
+        const cuisineLine =
+          i.cuisine && i.cuisine !== 'any'
+            ? `요리 종류(고정): ${cuisineLabel} — 이 풍미·스타일에 맞는 집밥 레시피로.`
+            : ''
         const variantNote =
           variant === 'spicier'
             ? 'Rewrite the recipe to be SPICIER for Korean taste (gochugaru, cheongyang, etc.). Keep JSON schema.'
@@ -336,6 +362,7 @@ export default function App() {
                 `메인 요리: ${dish}`,
                 `한 줄 요약: ${reasonSummary}`,
                 `예산 느낌: ${budgetLabel}`,
+                cuisineLine,
                 variantNote,
               ]
                 .filter(Boolean)
@@ -353,7 +380,7 @@ export default function App() {
         setRecipeVariantLoading(null)
       }
     },
-    [dish, reasonSummary, input.budget],
+    [dish, reasonSummary, input],
   )
 
   const handleRecipeLoad = useCallback(() => fetchRecipe(null), [fetchRecipe])

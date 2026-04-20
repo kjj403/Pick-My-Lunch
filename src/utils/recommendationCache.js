@@ -1,4 +1,4 @@
-const KEY = 'food-app-reco-cache-v7'
+const KEY = 'food-app-reco-cache-v8'
 const TTL_MS = 12 * 60 * 1000
 
 function read() {
@@ -28,6 +28,7 @@ export function inputKey(values) {
     h: values.hunger,
     m: values.mood,
     b: values.budget,
+    c: values.cuisine,
   })
 }
 

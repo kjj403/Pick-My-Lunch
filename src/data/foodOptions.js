@@ -28,9 +28,19 @@ export const BUDGET = [
   { id: 'splurge', emoji: '👑', label: 'Splurge' },
 ]
 
+/** 한식 / 중식 / 일식 / 양식 — 아무거나는 제약 없음 */
+export const CUISINE = [
+  { id: 'korean', emoji: '🍚', label: '한식' },
+  { id: 'chinese', emoji: '🥟', label: '중식' },
+  { id: 'japanese', emoji: '🍣', label: '일식' },
+  { id: 'western', emoji: '🍝', label: '양식' },
+  { id: 'any', emoji: '🎲', label: '아무거나' },
+]
+
 export const defaultInputValues = {
   weather: WEATHER[0].id,
   hunger: HUNGER[1].id,
   mood: MOOD[0].id,
   budget: BUDGET[1].id,
+  cuisine: CUISINE[4].id,
 }

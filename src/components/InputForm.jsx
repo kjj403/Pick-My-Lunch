@@ -1,4 +1,4 @@
-import { WEATHER, HUNGER, MOOD, BUDGET, defaultInputValues } from '../data/foodOptions'
+import { WEATHER, HUNGER, MOOD, BUDGET, CUISINE, defaultInputValues } from '../data/foodOptions'
 
 function OptionGrid({ title, options, field, value, onChange, disabled }) {
   return (
@@ -48,13 +48,15 @@ export function InputForm({
   onSubmit,
   disabled = false,
 }) {
+  const v = { ...defaultInputValues, ...values }
+
   function handleFieldChange(field, id) {
-    onChange?.({ ...values, [field]: id })
+    onChange?.({ ...v, [field]: id })
   }
 
   function handleSubmit(e) {
     e.preventDefault()
-    onSubmit?.(values)
+    onSubmit?.(v)
   }
 
   return (
@@ -78,7 +80,7 @@ export function InputForm({
           title="Weather"
           options={WEATHER}
           field="weather"
-          value={values.weather}
+          value={v.weather}
           onChange={handleFieldChange}
           disabled={disabled}
         />
@@ -86,7 +88,7 @@ export function InputForm({
           title="Hunger level"
           options={HUNGER}
           field="hunger"
-          value={values.hunger}
+          value={v.hunger}
           onChange={handleFieldChange}
           disabled={disabled}
         />
@@ -94,7 +96,7 @@ export function InputForm({
           title="Mood"
           options={MOOD}
           field="mood"
-          value={values.mood}
+          value={v.mood}
           onChange={handleFieldChange}
           disabled={disabled}
         />
@@ -102,7 +104,15 @@ export function InputForm({
           title="Budget"
           options={BUDGET}
           field="budget"
-          value={values.budget}
+          value={v.budget}
+          onChange={handleFieldChange}
+          disabled={disabled}
+        />
+        <OptionGrid
+          title="Cuisine"
+          options={CUISINE}
+          field="cuisine"
+          value={v.cuisine}
           onChange={handleFieldChange}
           disabled={disabled}
         />
